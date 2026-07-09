@@ -48,7 +48,7 @@ Requirements: Python **3.10+** and [Ollama](https://ollama.com/download).
 ollama pull qwen2.5:3b
 
 # 2. Install
-git clone https://github.com/<your-user>/agentic-rag.git
+git clone https://github.com/Slahnia/agentic-rag.git
 cd agentic-rag
 python -m venv .venv && .venv\Scripts\activate    # Windows
 pip install -e ".[ui,eval,dev]"
