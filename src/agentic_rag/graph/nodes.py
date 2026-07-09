@@ -58,9 +58,7 @@ def grade_documents(state: GraphState) -> GraphState:
     relevant = [
         doc
         for doc in state["documents"]
-        if grader.invoke(
-            {"document": doc.page_content, "question": state["question"]}
-        ).binary_score
+        if grader.invoke({"document": doc.page_content, "question": state["question"]})
         == "yes"
     ]
     logger.info("Document grading: %d/%d relevant", len(relevant), len(state["documents"]))
@@ -136,7 +134,7 @@ def grade_generation(state: GraphState) -> str:
             "documents": _format_docs(state["documents"]),
             "generation": state["generation"],
         }
-    ).binary_score
+    )
     if grounded == "yes":
         return "useful"
     if state.get("retries", 0) < settings.max_retries:
