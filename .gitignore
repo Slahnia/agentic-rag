@@ -15,6 +15,8 @@ venv/
 data/sample.db
 evaluation/results.csv
 evaluation/results.md
+evaluation/eval_log.txt
+evaluation/eval_err.txt
 
 # IDE / OS
 .vscode/

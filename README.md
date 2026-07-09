@@ -90,10 +90,26 @@ python evaluation/run_evaluation.py
 
 Per-question scores are written to `evaluation/results.csv`. Reading the metrics **together** localises the failure: low recall + high faithfulness → retrieval is the bottleneck; high recall + low faithfulness → the generator ignores its evidence.
 
-> ⚠️ On CPU the judge defaults to the same 3B model, so absolute scores are noisy — treat them as a regression signal across changes, not ground truth. Set `EVAL_MODEL` to a larger model for more reliable judgments.
+### The judge matters (measured, not assumed)
+
+The judge defaults to the same 3B model the agent uses, and that turned out to be measurably unreliable: it scored **faithfulness 0.0** on an answer that was near-verbatim from the source document (full context retrieved, recall 1.0). Faithfulness requires decomposing an answer into claims and verifying each one — too hard for a 3B model. Answer relevancy, context precision and recall are simpler judgments and stayed consistent.
+
+Fix: keep the small model for the agent, use a larger one only as judge (`EVAL_MODEL=qwen2.5:7b`). Evaluation is offline, so the extra latency doesn't matter.
+
+Results on this repo's sample KB and [dataset](evaluation/dataset.json), agent = `qwen2.5:3b` on CPU:
+
+| Metric | 3B judge | 7B judge |
+|---|---|---|
+| Faithfulness | 0.500 ⚠️ | **0.833** |
+| Response relevancy | 0.893 | 0.870 |
+| Context precision | 0.812 | 1.000 |
+| Context recall | 0.783 | 0.746 |
+
+Same agent, same answers — faithfulness jumps from 0.50 to 0.83 just by upgrading the judge, confirming the 3B score was judge noise rather than hallucination. The simpler embedding-based relevancy metric barely moves, as expected.
 
 ## Design decisions
 
+- **Graders reason before they judge.** Forcing a 3B model to emit an immediate structured yes/no made it reject obviously relevant chunks (0/4 relevant with the answer verbatim in the KB). Letting it think briefly and parsing a trailing `VERDICT: yes|no` fixed grading with the same model — chain-of-thought is not optional at this size. Parse failures default to the *safe* verdict so grading noise can never discard all evidence or trap the graph in a loop.
 - **Every self-correction loop is bounded.** Rewrite attempts are capped and the vectorstore path falls back to web search, so the graph always terminates — no runaway LLM-call loops.
 - **CPU latency shaped the architecture.** Each grading step is an extra LLM call (seconds on CPU). The system keeps the two highest-value checks (document relevance, answer grounding) and skips a separate answer-usefulness grader.
 - **SQL is read-only by construction.** Generated queries are validated to be single `SELECT`/`WITH` statements with no DDL/DML keywords before execution ([`tools/sql.py`](src/agentic_rag/tools/sql.py)).
