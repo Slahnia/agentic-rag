@@ -22,16 +22,19 @@ dependencies = [
     "pypdf>=5.0",
     "sqlalchemy>=2.0",
     "python-dotenv>=1.0",
+    "pandas>=2.0",
+    "openpyxl>=3.1",
 ]
 
 [project.optional-dependencies]
 ui = ["streamlit>=1.38"]
-eval = ["ragas>=0.4", "pandas>=2.0", "datasets>=2.0"]
+eval = ["ragas>=0.4", "datasets>=2.0"]
 dev = ["pytest>=8.0"]
 
 [project.scripts]
 agentic-rag = "agentic_rag.cli:main"
 agentic-rag-ingest = "agentic_rag.ingestion:main"
+agentic-rag-ingest-csv = "agentic_rag.tabular:main"
 
 [build-system]
 requires = ["setuptools>=68"]

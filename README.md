@@ -71,7 +71,17 @@ Try questions that exercise each route:
 | "Which product had the most sales in Spain?" | 🗄️ SQL |
 | "What happened in the news today?" | 🌐 web search |
 
-To use **your own documents**, drop `.md`/`.txt`/`.pdf` files into `data/documents/`, run `agentic-rag-ingest`, and update `KB_DESCRIPTION` in `.env` so the router knows what the knowledge base contains.
+### Bring your own data
+
+**Text documents** (`.md`/`.txt`/`.pdf`): drop them into `data/documents/`, run `agentic-rag-ingest`, and update `KB_DESCRIPTION` in `.env` so the router knows what the knowledge base contains.
+
+**Tabular data** (`.csv`/`.xlsx`): text embeddings are the wrong tool for aggregations — "which product sold the most?" needs exact SQL, not an LLM doing arithmetic over text chunks. Drop your files into `data/tables/` and run:
+
+```bash
+agentic-rag-ingest-csv
+```
+
+Each file becomes a SQLite table (named after the file). The command prints a ready-made `SQL_DESCRIPTION` line for your `.env` — set it so the router sends numerical questions to SQL.
 
 ## Evaluation
 
@@ -124,6 +134,7 @@ agentic-rag/
 ├── src/agentic_rag/
 │   ├── config.py               # settings via env vars / .env
 │   ├── ingestion.py            # load → chunk → embed → Chroma
+│   ├── tabular.py              # CSV/Excel → SQLite tables
 │   ├── cli.py                  # terminal interface
 │   ├── graph/
 │   │   ├── state.py            # shared GraphState
@@ -151,6 +162,7 @@ docker compose exec ollama ollama pull qwen2.5:3b   # first time only
 
 ## Roadmap
 
+- [ ] **Plan-and-execute router (v2)** — today each question goes to exactly one source; a question like *"does our best-selling product have good reviews online?"* needs SQL (the best seller) **then** web search (its reviews). That requires decomposing the question into chained sub-tasks and threading intermediate results between sources — a significant jump in complexity, and the natural next level for this graph.
 - [ ] Hybrid search (BM25 + dense) with reranking
 - [ ] Conversation memory (multi-turn) via LangGraph checkpoints
 - [ ] Observability with self-hosted Langfuse

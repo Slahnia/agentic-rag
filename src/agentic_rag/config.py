@@ -44,6 +44,7 @@ class Settings:
 
     # SQL source
     sqlite_path: str = field(default_factory=lambda: _path("SQLITE_PATH", "data/sample.db"))
+    tables_dir: str = field(default_factory=lambda: _path("TABLES_DIR", "data/tables"))
 
     # Source descriptions used by the router prompt
     kb_description: str = os.getenv(
