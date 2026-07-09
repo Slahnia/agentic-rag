@@ -11,7 +11,8 @@ keywords = ["rag", "langgraph", "langchain", "agents", "ollama", "ragas"]
 dependencies = [
     "langgraph>=0.2",
     "langchain-core>=0.3",
-    "langchain-community>=0.3",
+    # <0.4: ragas imports langchain_community.chat_models.vertexai, removed in 0.4
+    "langchain-community>=0.3,<0.4",
     "langchain-text-splitters>=0.3",
     "langchain-ollama>=0.2",
     "langchain-huggingface>=0.1",
@@ -25,7 +26,7 @@ dependencies = [
 
 [project.optional-dependencies]
 ui = ["streamlit>=1.38"]
-eval = ["ragas>=0.2,<0.3", "pandas>=2.0", "datasets>=2.0"]
+eval = ["ragas>=0.4", "pandas>=2.0", "datasets>=2.0"]
 dev = ["pytest>=8.0"]
 
 [project.scripts]
