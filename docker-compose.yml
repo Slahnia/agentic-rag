@@ -1,0 +1,25 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+
+  app:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+    depends_on:
+      - ollama
+    volumes:
+      - chroma:/app/.chroma
+
+volumes:
+  ollama:
+  chroma:
+
+# First run: pull the model into the ollama volume
+#   docker compose exec ollama ollama pull qwen2.5:3b

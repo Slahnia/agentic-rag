@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Environment
+.env
+
+# Generated artifacts
+.chroma/
+data/sample.db
+evaluation/results.csv
+evaluation/results.md
+
+# IDE / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Test / cache
+.pytest_cache/
