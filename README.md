@@ -170,7 +170,7 @@ docker compose exec ollama ollama pull qwen2.5:3b   # first time only
 
 - [ ] **Plan-and-execute router (v2)** — today each question goes to exactly one source; a question like *"does our best-selling product have good reviews online?"* needs SQL (the best seller) **then** web search (its reviews). That requires decomposing the question into chained sub-tasks and threading intermediate results between sources — a significant jump in complexity, and the natural next level for this graph.
 - [ ] **GraphRAG route** — a fourth data source for the router: extract entities and relations from the documents into a knowledge graph and retrieve by traversing connections. Complements vector search for questions whose answer lives in the *relationships across* many documents rather than in any single chunk.
-- [ ] Hybrid search (BM25 + dense) with reranking
+- [ ] Hybrid search (BM25 + dense) with reranking — there is already a motivating case in the eval results: question 5 of the dataset is a genuine retrieval miss (context recall 0.0) that keyword search would likely catch
 - [ ] Conversation memory (multi-turn) via LangGraph checkpoints
 - [ ] Observability with self-hosted Langfuse
 - [ ] Synthetic eval-set generation with RAGAS `TestsetGenerator`
