@@ -89,11 +89,19 @@ def query_sql(state: GraphState) -> GraphState:
     return {"documents": [document]}
 
 
+SOURCE_NOTES = {
+    "vectorstore": "the user's own indexed documents",
+    "web_search": "a public web search — NOT the user's documents",
+    "sql": "a SQL query over the user's database",
+}
+
+
 def generate(state: GraphState) -> GraphState:
     generation = get_generator().invoke(
         {
             "context": _format_docs(state["documents"]),
             "question": state.get("original_question", state["question"]),
+            "source_note": SOURCE_NOTES.get(state["datasource"], "an unknown source"),
         }
     )
     return {"generation": generation}

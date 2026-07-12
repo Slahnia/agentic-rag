@@ -176,7 +176,13 @@ GENERATOR_PROMPT = ChatPromptTemplate.from_messages(
             "below to answer. If the context does not contain the answer, say "
             "you don't know — never invent information. Be concise, mention "
             "the source names when useful, and answer in the same language as "
-            "the question.\n\nContext:\n{context}",
+            "the question.\n\n"
+            "The context comes from {source_note}. Be truthful about this "
+            "provenance: never attribute the information to a different "
+            "source, even if the question assumes one (e.g. if the question "
+            "says 'according to my documents' but the context comes from a "
+            "web search, make clear the answer was found on the web).\n\n"
+            "Context:\n{context}",
         ),
         ("human", "{question}"),
     ]
