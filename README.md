@@ -101,22 +101,26 @@ python evaluation/run_evaluation.py
 
 Per-question scores are written to `evaluation/results.csv`. Reading the metrics **together** localises the failure: low recall + high faithfulness → retrieval is the bottleneck; high recall + low faithfulness → the generator ignores its evidence.
 
+### Current results
+
+On this repo's sample KB and [dataset](evaluation/dataset.json) — agent = `qwen2.5:3b` on CPU, judge = `qwen2.5:7b`:
+
+| Metric | Score |
+|---|---|
+| Faithfulness | 0.89 |
+| Response relevancy | 0.81 |
+| Context precision | 0.88 |
+| Context recall | 0.77 |
+
+Read the per-question CSV, not just the averages — that's where the diagnosis is. In this run: one question scores 0.0 relevancy on an answer that is plainly correct and on-topic (LLM-as-judge metrics stay noisy even with a decent judge), and one shows a genuine retrieval miss (context recall 0.0) worth fixing. Treat scores as regression signals across changes, not absolute truth.
+
 ### The judge matters (measured, not assumed)
 
-The judge defaults to the same 3B model the agent uses, and that turned out to be measurably unreliable: it scored **faithfulness 0.0** on an answer that was near-verbatim from the source document (full context retrieved, recall 1.0). Faithfulness requires decomposing an answer into claims and verifying each one — too hard for a 3B model. Answer relevancy, context precision and recall are simpler judgments and stayed consistent.
+The judge defaults to the same 3B model the agent uses, and that turned out to be measurably unreliable: in an earlier run it scored **faithfulness 0.0** on an answer that was near-verbatim from the source document (full context retrieved, recall 1.0). Rescoring the *same answers* with a 7B judge moved faithfulness from **0.50 to 0.83** — the agent wasn't hallucinating; the judge couldn't decompose answers into claims and verify them, which is exactly what faithfulness requires. Simpler judgments (relevancy, precision, recall) barely moved between judges.
 
 Fix: keep the small model for the agent, use a larger one only as judge (`EVAL_MODEL=qwen2.5:7b`). Evaluation is offline, so the extra latency doesn't matter.
 
-Results on this repo's sample KB and [dataset](evaluation/dataset.json), agent = `qwen2.5:3b` on CPU:
-
-| Metric | 3B judge | 7B judge |
-|---|---|---|
-| Faithfulness | 0.500 ⚠️ | **0.833** |
-| Response relevancy | 0.893 | 0.870 |
-| Context precision | 0.812 | 1.000 |
-| Context recall | 0.783 | 0.746 |
-
-Same agent, same answers — faithfulness jumps from 0.50 to 0.83 just by upgrading the judge, confirming the 3B score was judge noise rather than hallucination. The simpler embedding-based relevancy metric barely moves, as expected.
+One more CPU-specific pitfall, also measured: RAGAS fires judge calls in parallel, but CPU inference serialises them, so queued calls hit the request timeout and leave NaN scores. The harness pins `RunConfig(timeout=600, max_workers=1)` to get a complete score grid.
 
 ## Design decisions
 

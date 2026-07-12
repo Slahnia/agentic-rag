@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from langchain_ollama import ChatOllama
 from ragas import EvaluationDataset, evaluate
+from ragas.run_config import RunConfig
 from ragas.dataset_schema import SingleTurnSample
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from ragas.llms import LangchainLLMWrapper
@@ -83,6 +84,9 @@ def main() -> None:
         ],
         llm=judge,
         embeddings=embeddings,
+        # CPU inference serialises concurrent requests: parallel judge calls
+        # just queue up and hit the default timeout, leaving NaN scores.
+        run_config=RunConfig(timeout=600, max_workers=1),
     )
 
     df = result.to_pandas()
