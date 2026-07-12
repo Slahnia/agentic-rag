@@ -16,9 +16,9 @@ from .chains import (
     get_document_grader,
     get_generator,
     get_grounding_grader,
-    get_llm,
     get_rewriter,
     get_router,
+    get_sql_llm,
 )
 from .state import GraphState
 
@@ -85,7 +85,7 @@ def web_search(state: GraphState) -> GraphState:
 
 
 def query_sql(state: GraphState) -> GraphState:
-    document = run_sql_question(state["question"], get_llm())
+    document = run_sql_question(state["question"], get_sql_llm())
     return {"documents": [document]}
 
 

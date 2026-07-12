@@ -26,6 +26,9 @@ class Settings:
     # Models
     llm_model: str = os.getenv("LLM_MODEL", "qwen2.5:3b")
     eval_model: str = os.getenv("EVAL_MODEL", os.getenv("LLM_MODEL", "qwen2.5:3b"))
+    # Text-to-SQL is the hardest task in the pipeline for a small model;
+    # point this to a larger one (e.g. qwen2.5:7b) if your RAM allows.
+    sql_model: str = os.getenv("SQL_MODEL", os.getenv("LLM_MODEL", "qwen2.5:3b"))
     ollama_base_url: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     temperature: float = float(os.getenv("LLM_TEMPERATURE", "0"))
     embedding_model: str = os.getenv(
@@ -54,8 +57,10 @@ class Settings:
     )
     sql_description: str = os.getenv(
         "SQL_DESCRIPTION",
-        "A SQLite database of a fictional online store with two tables: "
-        "products (name, category, price) and sales (product, quantity, date, country).",
+        "A SQLite database of a fictional online store with three tables: "
+        "products (name, category, price), sales (product, quantity, date, "
+        "country) and product_reviews (product, rating, country, review_date, "
+        "comment).",
     )
 
 

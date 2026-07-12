@@ -53,8 +53,9 @@ cd agentic-rag
 python -m venv .venv && .venv\Scripts\activate    # Windows
 pip install -e ".[ui,eval,dev]"
 
-# 3. Create the sample SQL database and index the sample docs
+# 3. Create the sample SQL database, load the sample CSV and index the sample docs
 python scripts/create_sample_db.py
+agentic-rag-ingest-csv
 agentic-rag-ingest
 
 # 4. Chat!
@@ -123,6 +124,7 @@ Same agent, same answers — faithfulness jumps from 0.50 to 0.83 just by upgrad
 - **Every self-correction loop is bounded.** Rewrite attempts are capped and the vectorstore path falls back to web search, so the graph always terminates — no runaway LLM-call loops.
 - **CPU latency shaped the architecture.** Each grading step is an extra LLM call (seconds on CPU). The system keeps the two highest-value checks (document relevance, answer grounding) and skips a separate answer-usefulness grader.
 - **SQL is read-only by construction.** Generated queries are validated to be single `SELECT`/`WITH` statements with no DDL/DML keywords before execution ([`tools/sql.py`](src/agentic_rag/tools/sql.py)).
+- **SQL self-corrects, and can use a bigger model.** Failed queries (syntax errors *and* suspicious empty results — usually a wrong JOIN) are fed back to the model with the error for a bounded number of attempts. Text-to-SQL proved to be the hardest task for the 3B model: it fixed its MySQL-isms on retry but never let go of a wrong JOIN, while `qwen2.5:7b` wrote the correct query first try. Set `SQL_MODEL=qwen2.5:7b` to upgrade only this route — the rest of the agent stays on the fast 3B.
 - **Honest failure over confident nonsense.** If a source returns nothing, the generator is instructed to say "I don't know" rather than fill gaps from parametric memory — and the eval dataset includes unanswerable questions to verify it.
 - **Testable control flow.** Routing decisions are pure functions over the graph state, unit-tested without any model running (`pytest tests/`).
 

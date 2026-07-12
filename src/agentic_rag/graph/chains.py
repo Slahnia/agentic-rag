@@ -25,6 +25,16 @@ def get_llm() -> ChatOllama:
     )
 
 
+@lru_cache(maxsize=1)
+def get_sql_llm() -> ChatOllama:
+    """LLM for text-to-SQL, optionally a larger model than the agent's."""
+    return ChatOllama(
+        model=settings.sql_model,
+        base_url=settings.ollama_base_url,
+        temperature=settings.temperature,
+    )
+
+
 # --------------------------------------------------------------------------
 # Router: pick the best data source for the question
 # --------------------------------------------------------------------------
