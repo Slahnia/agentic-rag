@@ -60,6 +60,14 @@ if question := st.chat_input("Ask me anything…"):
         answer = state.get("generation", "Something went wrong — no answer produced.")
         st.markdown(answer)
 
+        SOURCE_BANNERS = {
+            "vectorstore": "📚 Answered from your indexed documents.",
+            "web_search": "🌐 Answered from a public web search — your indexed documents did not cover this.",
+            "sql": "🗄️ Answered by querying your SQL database.",
+        }
+        if banner := SOURCE_BANNERS.get(state.get("datasource", "")):
+            st.caption(banner)
+
         documents = state.get("documents", [])
         if documents:
             with st.expander(f"Evidence ({state.get('datasource', '?')} — {len(documents)} items)"):
